@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ooznest | grblHAL Installer</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Roboto:wght@400;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+
+    <!-- Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <style>
+        :root {
+            --oz-primary: #FF6600;
+            --oz-primary-light: #FF8533;
+            --oz-teal-brand: #004C5B;
+            --oz-teal-mid: #449D9F;
+            --oz-teal-light: #B0CACF;
+            --oz-teal-xlight: #EBEFEF;
+            --oz-grey-dark: #2F373C;
+            --oz-grey-mid: #909090;
+            --oz-white: #FFFFFF;
+            --oz-error: #D32F2F;
+            --oz-r-xl: 30px;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            font-size: 15px;
+            background-color: var(--oz-teal-xlight);
+            color: var(--oz-grey-dark);
+            margin: 0; padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        h1, h2, h3 { font-family: 'Nunito', sans-serif; font-weight: 800; margin: 0; }
+
+        .page-header {
+            background-color: var(--oz-white);
+            border-bottom: 2px solid var(--oz-teal-xlight);
+            padding: 16px 40px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0, 76, 91, 0.07);
+        }
+
+        .container {
+            max-width: 850px;
+            width: 95%;
+            margin: 30px auto;
+            background: var(--oz-teal-mid);
+            padding: 40px;
+            border-radius: var(--oz-r-xl) 0 0 0;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+
+        .diagram-section {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 24px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+        }
+
+        .diagram-img {
+            max-width: 45%;
+            height: auto;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .instruction-box p { margin: 8px 0; font-weight: 400; font-size: 15px; line-height: 1.5; }
+        .instruction-box strong { color: white; font-weight: 900; text-decoration: underline; }
+
+        .action-bar { display: flex; gap: 12px; margin-bottom: 20px; }
+
+        button {
+            font-family: 'Nunito', sans-serif;
+            font-size: 14px;
+            font-weight: 800;
+            border-radius: 6px;
+            border: none;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary { background-color: var(--oz-primary); color: white; flex: 2; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+        .btn-primary:hover:not(:disabled) { background-color: var(--oz-primary-light); transform: translateY(-1px); }
+
+        .btn-secondary { background-color: white; color: var(--oz-teal-brand); flex: 1; }
+        .btn-secondary:hover:not(:disabled) { background-color: var(--oz-teal-xlight); transform: translateY(-1px); }
+
+        button:disabled { background-color: #e0e0e0; color: #9e9e9e; cursor: not-allowed; box-shadow: none; }
+
+        .btn-ghost { background-color: rgba(255,255,255,0.2); color: white; padding: 0 15px; border: 1px solid rgba(255,255,255,0.3); min-width: 48px; }
+
+        .settings-panel {
+            display: none;
+            background-color: var(--oz-white);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            color: var(--oz-grey-dark);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .field label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--oz-grey-mid); margin-bottom: 4px; display: block; }
+
+        select { width: 100%; font-family: 'Nunito', sans-serif; padding: 10px; border: 1.5px solid var(--oz-teal-light); border-radius: 4px; outline: none; }
+
+        #terminal {
+            background-color: #000000;
+            color: #adbac7;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            padding: 20px;
+            height: 250px;
+            overflow-y: auto;
+            margin-top: 25px;
+            white-space: pre-wrap;
+            border-left: 4px solid var(--oz-primary);
+        }
+
+        .progress-wrap { margin-top: 20px; display: none; }
+        .progress-bar-bg { background-color: rgba(255,255,255,0.2); height: 12px; border-radius: 6px; overflow: hidden; margin-top: 8px; }
+        #progressBar { background-color: var(--oz-primary); height: 100%; width: 0%; transition: width 0.1s; }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            background: var(--oz-white);
+            max-width: 550px;
+            width: 90%;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.25);
+            color: var(--oz-grey-dark);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal h3 { font-size: 20px; margin-top: 0; }
+        .modal.success h3 { color: var(--oz-teal-brand); }
+        .modal.error h3 { color: var(--oz-error); }
+        .modal p { font-size: 14px; margin: 0; }
+
+        .modal .modal-diagram {
+            background-color: var(--oz-teal-xlight);
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        .modal img { max-width: 100%; height: auto; display: block; }
+
+        .btn-error { background-color: var(--oz-error); color: white; width: 200px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+
+    <div class="page-header">
+        <h1>Ooznest <span style="color: var(--oz-primary);">Motion Control Core</span></h1>
+        <p style="font-family: 'Roboto'; font-size: 11px; color: var(--oz-grey-mid); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">Firmware Deployment Utility</p>
+    </div>
+
+    <div class="container">
+        <div class="diagram-section">
+            <img class="diagram-img" src="diagram.png" alt="Ooznest Core Diagram"/>
+            <div class="instruction-box">
+                <p>1) Connect <strong>USB-C Cable</strong> to your computer.</p>
+                <p>2) Press and hold the <strong>MODE</strong> button.</p>
+                <p>3) Click <strong>RESET</strong>, then release <strong>MODE</strong>.</p>
+            </div>
+        </div>
+
+        <div class="action-bar">
+            <button id="btnConnect" class="btn-secondary">4. Connect Device</button>
+            <button id="toggleSettings" class="btn-ghost" title="Settings">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.81,11.69,4.81,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.5c-1.93,0-3.5-1.57-3.5-3.5 s1.57-3.5,3.5-3.5s3.5,1.57,3.5,3.5S13.93,15.5,12,15.5z"/></svg>
+            </button>
+            <button id="btnFlash" class="btn-primary" disabled>5. Flash grblHAL</button>
+        </div>
+
+        <div id="settingsPanel" class="settings-panel">
+            <div class="field">
+                <label>Baud Rate</label>
+                <select id="baudRate">
+                    <option value="115200">115200</option>
+                    <option value="230400">230400</option>
+                    <option value="460800" selected>460800</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Flash Mode</label>
+                <select id="flashMode">
+                    <option value="dio" selected>DIO</option>
+                    <option value="qio">QIO</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="progress-wrap" id="progressWrap">
+            <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                <label style="font-weight: 800; letter-spacing: 1px;">DEPLOYMENT PROGRESS</label>
+                <span id="progressPercent" style="font-weight: 900;">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div id="progressBar"></div>
+            </div>
+        </div>
+
+        <div id="terminal">System Ready. Waiting for connection...</div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal success">
+            <h3>Flash Complete!</h3>
+            <p>Deployment successful. Press <strong>RESET</strong> on the Core to initialize grblHAL.</p>
+            <div class="modal-diagram">
+                <img src="diagram.png" alt="Reset Button">
+            </div>
+            <button onclick="document.getElementById('modalOverlay').style.display='none'" class="btn-primary" style="margin: 0 auto; width: 200px;">Finish</button>
+        </div>
+    </div>
+
+    <!-- Failure Modal -->
+    <div class="modal-overlay" id="errorModal">
+        <div class="modal error">
+            <h3 id="errorTitle">Deployment Failed</h3>
+            <p id="errorMessage">An unexpected error occurred during the flashing process.</p>
+            <div class="modal-diagram">
+                <p id="errorAdvice" style="color: var(--oz-grey-dark); padding: 20px; font-size: 13px; line-height: 1.4;">Please check the USB connection and ensure the device is in Bootloader mode before trying again.</p>
+            </div>
+            <button onclick="document.getElementById('errorModal').style.display='none'" class="btn-primary btn-error">Retry</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import {
+            ESPLoader, Transport, ClassicReset, HardReset
+        } from "https://unpkg.com/esptool-js/bundle.js";
+
+        const termDiv = document.getElementById('terminal');
+        const btnConnect = document.getElementById('btnConnect');
+        const btnFlash = document.getElementById('btnFlash');
+        const toggleSettings = document.getElementById('toggleSettings');
+        const settingsPanel = document.getElementById('settingsPanel');
+        const progressBar = document.getElementById('progressBar');
+        const progressWrap = document.getElementById('progressWrap');
+        const progressPercent = document.getElementById('progressPercent');
+
+        const modalOverlay = document.getElementById('modalOverlay');
+        const errorModal = document.getElementById('errorModal');
+        const errorTitle = document.getElementById('errorTitle');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorAdvice = document.getElementById('errorAdvice');
+
+        let device, transport, esploader;
+
+        const terminal = {
+            clean() { termDiv.innerText = ''; },
+            writeLine(data) { this.write(data + '\n'); },
+            write(data) {
+                termDiv.innerText += data;
+                termDiv.scrollTop = termDiv.scrollHeight;
+            }
+        };
+
+        toggleSettings.onclick = () => {
+            const isVisible = settingsPanel.style.display === 'grid';
+            settingsPanel.style.display = isVisible ? 'none' : 'grid';
+        };
+
+        btnConnect.onclick = async () => {
+            try {
+                if (device) await transport.disconnect();
+                terminal.clean();
+                terminal.writeLine("[SYSTEM] Requesting Ooznest Core port...");
+
+                device = await navigator.serial.requestPort({
+                    filters: [{ usbVendorId: 0x303a, usbProductId: 0x1001 }]
+                });
+
+                transport = new Transport(device);
+                esploader = new ESPLoader({
+                    transport,
+                    baudrate: parseInt(document.getElementById('baudRate').value),
+                    terminal,
+                    resetConstructors: {
+                        classicReset: (t, d) => new ClassicReset(t, d),
+                        hardReset: (t, u) => new HardReset(t, u),
+                    }
+                });
+
+                const chipName = await esploader.main("default_reset");
+                terminal.writeLine(`\n[SUCCESS] Connected to ${chipName}`);
+                btnConnect.disabled = true;
+                btnFlash.disabled = false;
+
+            } catch (e) {
+                terminal.writeLine(`\n[ERROR] ${e.message}`);
+                btnConnect.disabled = false;
+            }
+        };
+
+        btnFlash.onclick = async () => {
+            try {
+                btnFlash.disabled = true;
+                progressWrap.style.display = 'block';
+
+                const loadFile = async (name) => {
+                    terminal.writeLine(`[FILE] Loading ${name}...`);
+                    const r = await fetch(name);
+                    if (!r.ok) throw new Error(`Missing ${name}`);
+                    return new Uint8Array(await r.arrayBuffer());
+                };
+
+                const bootloader = await loadFile('bootloader.bin');
+                const partitions = await loadFile('partitions.bin');
+                const firmware = await loadFile('firmware.bin');
+
+                await esploader.writeFlash({
+                    fileArray: [
+                        { data: bootloader, address: 0x0000 },
+                        { data: partitions, address: 0x8000 },
+                        { data: firmware,   address: 0x10000 }
+                    ],
+                    flashMode: document.getElementById('flashMode').value,
+                    flashFreq: "40m",
+                    flashSize: "4MB",
+                    compress: true,
+                    reportProgress: (i, written, total) => {
+                        const p = Math.round((written / total) * 100);
+                        progressBar.style.width = p + '%';
+                        progressPercent.innerText = p + '%';
+                    },
+                    calculateMD5Hash: (img) => CryptoJS.MD5(CryptoJS.lib.WordArray.create(img)).toString()
+                });
+
+                terminal.writeLine("\n[COMPLETE] Device flashed successfully.");
+                modalOverlay.style.display = 'flex';
+                btnConnect.disabled = false;
+
+            } catch (e) {
+                const msg = e.message || "Unknown error";
+                terminal.writeLine(`\n[CRITICAL] ${msg}`);
+
+                errorTitle.innerText = "Deployment Failed";
+                errorMessage.innerText = msg;
+
+                // Targeted advice for "Device Lost"
+                if (msg.includes("device has been lost") || msg.includes("disconnected")) {
+                    errorTitle.innerText = "Connection Lost";
+                    errorAdvice.innerHTML = "<strong>Possible Causes:</strong><br>• USB Cable was disconnected or bumped.<br>• OS power-management reset the port.<br><br><strong>Try:</strong> Using a <u>lower Baud Rate</u> (e.g. 115200) and a different USB cable/port.";
+                } else {
+                    errorAdvice.innerText = "Please check the USB connection and ensure the device is in Bootloader mode before trying again.";
+                }
+
+                errorModal.style.display = 'flex';
+                btnConnect.disabled = false;
+            } finally {
+                btnFlash.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
