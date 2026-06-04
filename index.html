@@ -226,6 +226,20 @@
                     <option value="qio">QIO</option>
                 </select>
             </div>
+            <div class="field">
+                <label>Before Reset</label>
+                <select id="beforeMode">
+                    <option value="no_reset">No Reset (native USB)</option>
+                    <option value="default_reset">Default Reset</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>After Flash</label>
+                <select id="afterMode">
+                    <option value="flash_finish">Boot App (flash finish)</option>
+                    <option value="no_reset">Stay in Bootloader</option>
+                </select>
+            </div>
         </div>
 
         <div class="progress-wrap" id="progressWrap">
@@ -245,7 +259,7 @@
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal success">
             <h3>Flash Complete!</h3>
-            <p>Deployment successful. Press <strong>RESET</strong> on the Core to initialize grblHAL.</p>
+            <p>Deployment successful. The application has been started.</p>
             <div class="modal-diagram">
                 <img src="diagram.png" alt="Reset Button">
             </div>
@@ -322,7 +336,8 @@
                     }
                 });
 
-                const chipName = await esploader.main("default_reset");
+                const beforeMode = document.getElementById('beforeMode').value;
+                const chipName = await esploader.main(beforeMode);
                 terminal.writeLine(`\n[SUCCESS] Connected to ${chipName}`);
                 btnConnect.disabled = true;
                 btnFlash.disabled = false;
@@ -368,6 +383,15 @@
                 });
 
                 terminal.writeLine("\n[COMPLETE] Device flashed successfully.");
+
+                const afterMode = document.getElementById('afterMode').value;
+                if (afterMode === 'flash_finish') {
+                    terminal.writeLine("[RESET] Booting application...");
+                    await esploader.flashFinish(true);
+                } else {
+                    terminal.writeLine("[RESET] Leaving chip in bootloader.");
+                }
+
                 modalOverlay.style.display = 'flex';
                 btnConnect.disabled = false;
 
