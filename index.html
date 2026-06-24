@@ -214,9 +214,10 @@
             <div class="field">
                 <label>Baud Rate</label>
                 <select id="baudRate">
-                    <option value="115200">115200</option>
+                    <option value="115200" selected>115200</option>
                     <option value="230400">230400</option>
-                    <option value="460800" selected>460800</option>
+                    <option value="460800">460800</option>
+                    <option value="921600">921600</option>
                 </select>
             </div>
             <div class="field">
@@ -300,6 +301,11 @@
         const errorAdvice = document.getElementById('errorAdvice');
 
         let device, transport, esploader;
+        const DEFAULT_VENDOR_FILTERS = [{ usbVendorId: 0x303a, usbProductId: 0x1001 }];
+        const RETRYABLE_PACKET_ERRORS = [
+            "Invalid head of packet",
+            "Possible serial noise or corruption"
+        ];
 
         const terminal = {
             clean() { termDiv.innerText = ''; },
@@ -310,6 +316,93 @@
             }
         };
 
+        const getSelectedBaudrate = () => parseInt(document.getElementById('baudRate').value, 10);
+
+        const getRetryBaudrates = (preferredBaudrate) => {
+            const safeBaudrates = [115200, 230400];
+            return [preferredBaudrate, ...safeBaudrates].filter((baud, index, all) => all.indexOf(baud) === index);
+        };
+
+        const isRetryablePacketError = (error) => {
+            const message = error?.message || "";
+            return RETRYABLE_PACKET_ERRORS.some((fragment) => message.includes(fragment));
+        };
+
+        const disconnectTransport = async () => {
+            if (!transport) return;
+            try {
+                await transport.disconnect();
+            } catch (_) {
+                // Best-effort cleanup after a failed flash session.
+            } finally {
+                transport = null;
+                esploader = null;
+            }
+        };
+
+        const createLoader = async (baudrate, requestPort = false) => {
+            if (requestPort || !device) {
+                terminal.writeLine("[SYSTEM] Requesting Ooznest Core port...");
+                device = await navigator.serial.requestPort({ filters: DEFAULT_VENDOR_FILTERS });
+            }
+
+            transport = new Transport(device);
+            esploader = new ESPLoader({
+                transport,
+                baudrate,
+                terminal,
+                resetConstructors: {
+                    classicReset: (t, d) => new ClassicReset(t, d),
+                    hardReset: (t, u) => new HardReset(t, u),
+                }
+            });
+        };
+
+        const connectLoader = async (baudrate, requestPort = false) => {
+            await disconnectTransport();
+            await createLoader(baudrate, requestPort);
+            const beforeMode = document.getElementById('beforeMode').value;
+            const chipName = await esploader.main(beforeMode);
+            terminal.writeLine(`\n[SUCCESS] Connected to ${chipName} @ ${baudrate}`);
+        };
+
+        const loadFlashImages = async () => {
+            const loadFile = async (name) => {
+                terminal.writeLine(`[FILE] Loading ${name}...`);
+                const r = await fetch(name);
+                if (!r.ok) throw new Error(`Missing ${name}`);
+                return new Uint8Array(await r.arrayBuffer());
+            };
+
+            const [bootloader, partitions, firmware] = await Promise.all([
+                loadFile('bootloader.bin'),
+                loadFile('partitions.bin'),
+                loadFile('firmware.bin')
+            ]);
+
+            return { bootloader, partitions, firmware };
+        };
+
+        const writeFlash = async ({ bootloader, partitions, firmware }) => {
+            await esploader.writeFlash({
+                fileArray: [
+                    { data: bootloader, address: 0x0000 },
+                    { data: partitions, address: 0x8000 },
+                    { data: firmware, address: 0x10000 }
+                ],
+                flashMode: document.getElementById('flashMode').value,
+                flashFreq: "40m",
+                flashSize: "4MB",
+                compress: true,
+                reportProgress: (i, written, total) => {
+                    const percent = Math.round((written / total) * 100);
+                    progressBar.style.width = percent + '%';
+                    progressPercent.innerText = percent + '%';
+                },
+                calculateMD5Hash: (img) => CryptoJS.MD5(CryptoJS.lib.WordArray.create(img)).toString()
+            });
+        };
+
         toggleSettings.onclick = () => {
             const isVisible = settingsPanel.style.display === 'grid';
             settingsPanel.style.display = isVisible ? 'none' : 'grid';
@@ -317,34 +410,14 @@
 
         btnConnect.onclick = async () => {
             try {
-                if (device) await transport.disconnect();
                 terminal.clean();
-                terminal.writeLine("[SYSTEM] Requesting Ooznest Core port...");
-
-                device = await navigator.serial.requestPort({
-                    filters: [{ usbVendorId: 0x303a, usbProductId: 0x1001 }]
-                });
-
-                transport = new Transport(device);
-                esploader = new ESPLoader({
-                    transport,
-                    baudrate: parseInt(document.getElementById('baudRate').value),
-                    terminal,
-                    resetConstructors: {
-                        classicReset: (t, d) => new ClassicReset(t, d),
-                        hardReset: (t, u) => new HardReset(t, u),
-                    }
-                });
-
-                const beforeMode = document.getElementById('beforeMode').value;
-                const chipName = await esploader.main(beforeMode);
-                terminal.writeLine(`\n[SUCCESS] Connected to ${chipName}`);
+                await connectLoader(getSelectedBaudrate(), true);
                 btnConnect.disabled = true;
                 btnFlash.disabled = false;
-
             } catch (e) {
                 terminal.writeLine(`\n[ERROR] ${e.message}`);
                 btnConnect.disabled = false;
+                await disconnectTransport();
             }
         };
 
@@ -352,35 +425,34 @@
             try {
                 btnFlash.disabled = true;
                 progressWrap.style.display = 'block';
+                progressBar.style.width = '0%';
+                progressPercent.innerText = '0%';
 
-                const loadFile = async (name) => {
-                    terminal.writeLine(`[FILE] Loading ${name}...`);
-                    const r = await fetch(name);
-                    if (!r.ok) throw new Error(`Missing ${name}`);
-                    return new Uint8Array(await r.arrayBuffer());
-                };
+                const images = await loadFlashImages();
+                const baudrates = getRetryBaudrates(getSelectedBaudrate());
+                let flashError = null;
 
-                const bootloader = await loadFile('bootloader.bin');
-                const partitions = await loadFile('partitions.bin');
-                const firmware = await loadFile('firmware.bin');
+                for (const [index, baudrate] of baudrates.entries()) {
+                    try {
+                        if (index > 0) {
+                            terminal.writeLine(`\n[RETRY] Reconnecting at ${baudrate} baud after serial sync failure...`);
+                            progressBar.style.width = '0%';
+                            progressPercent.innerText = '0%';
+                            await connectLoader(baudrate);
+                        }
 
-                await esploader.writeFlash({
-                    fileArray: [
-                        { data: bootloader, address: 0x0000 },
-                        { data: partitions, address: 0x8000 },
-                        { data: firmware,   address: 0x10000 }
-                    ],
-                    flashMode: document.getElementById('flashMode').value,
-                    flashFreq: "40m",
-                    flashSize: "4MB",
-                    compress: true,
-                    reportProgress: (i, written, total) => {
-                        const p = Math.round((written / total) * 100);
-                        progressBar.style.width = p + '%';
-                        progressPercent.innerText = p + '%';
-                    },
-                    calculateMD5Hash: (img) => CryptoJS.MD5(CryptoJS.lib.WordArray.create(img)).toString()
-                });
+                        await writeFlash(images);
+                        flashError = null;
+                        break;
+                    } catch (e) {
+                        flashError = e;
+                        if (!isRetryablePacketError(e) || index === baudrates.length - 1) {
+                            throw e;
+                        }
+                    }
+                }
+
+                if (flashError) throw flashError;
 
                 terminal.writeLine("\n[COMPLETE] Device flashed successfully.");
 
@@ -394,7 +466,6 @@
 
                 modalOverlay.style.display = 'flex';
                 btnConnect.disabled = false;
-
             } catch (e) {
                 const msg = e.message || "Unknown error";
                 terminal.writeLine(`\n[CRITICAL] ${msg}`);
@@ -402,10 +473,12 @@
                 errorTitle.innerText = "Deployment Failed";
                 errorMessage.innerText = msg;
 
-                // Targeted advice for "Device Lost"
                 if (msg.includes("device has been lost") || msg.includes("disconnected")) {
                     errorTitle.innerText = "Connection Lost";
-                    errorAdvice.innerHTML = "<strong>Possible Causes:</strong><br>• USB Cable was disconnected or bumped.<br>• OS power-management reset the port.<br><br><strong>Try:</strong> Using a <u>lower Baud Rate</u> (e.g. 115200) and a different USB cable/port.";
+                    errorAdvice.innerHTML = "<strong>Possible Causes:</strong><br>&bull; USB cable was disconnected or bumped.<br>&bull; OS power-management reset the port.<br><br><strong>Try:</strong> Using a <u>lower Baud Rate</u> (e.g. 115200) and a different USB cable/port.";
+                } else if (msg.includes("Invalid head of packet")) {
+                    errorTitle.innerText = "Serial Sync Failed";
+                    errorAdvice.innerHTML = "<strong>What happened:</strong><br>The ESP32-S3 returned corrupted serial data after the stub changed baud rate.<br><br><strong>Try:</strong> Leave the baud rate at <u>115200</u> or <u>230400</u>, then reconnect and flash again.";
                 } else {
                     errorAdvice.innerText = "Please check the USB connection and ensure the device is in Bootloader mode before trying again.";
                 }
