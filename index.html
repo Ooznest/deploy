@@ -375,6 +375,44 @@
         .progress-bar-bg { background-color: #d9e3e4; height: 12px; border-radius: 999px; overflow: hidden; margin-top: 8px; }
         #progressBar { background: var(--oz-primary); height: 100%; width: 0%; transition: width 0.1s; }
 
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 31, 34, 0.45);
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-card {
+            width: min(680px, 100%);
+            background: var(--oz-white);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+            border: 1px solid rgba(0, 76, 91, 0.08);
+        }
+
+        .modal-card h3 {
+            color: var(--oz-teal-brand);
+            font-size: 24px;
+            margin: 0 0 12px;
+        }
+
+        .modal-card p {
+            margin: 0 0 12px;
+            line-height: 1.6;
+            color: var(--oz-grey-dark);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+
         @media (max-width: 720px) {
             .page-header {
                 padding: 16px 18px;
@@ -511,6 +549,18 @@
         </div>
 
     </div>
+    <div id="completionModal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="completionModalTitle">
+            <h3 id="completionModalTitle">Firmware installation complete</h3>
+            <p>Either press <strong>RESET</strong> on the controller to reboot the device with the new firmware, or power cycle the controller.</p>
+            <p>To power cycle fully: power off, remove the USB cable so the power provided by the USB cable is removed as well, then reconnect USB and power the controller up again.</p>
+            <p>The controller must be reset or power cycled for a fresh boot using the new firmware.</p>
+            <p>After that, connect to it using <strong>Ooznest Control</strong>.</p>
+            <div class="modal-actions">
+                <button id="closeCompletionModal" class="btn-primary" type="button">Close</button>
+            </div>
+        </div>
+    </div>
     <script type="module">
         import {
             ESPLoader, Transport, ClassicReset, HardReset
@@ -522,6 +572,8 @@
         const btnFlash = document.getElementById('btnFlash');
         const toggleSettings = document.getElementById('toggleSettings');
         const settingsPanel = document.getElementById('settingsPanel');
+        const completionModal = document.getElementById('completionModal');
+        const closeCompletionModal = document.getElementById('closeCompletionModal');
         const progressBar = document.getElementById('progressBar');
         const progressWrap = document.getElementById('progressWrap');
         const progressPercent = document.getElementById('progressPercent');
@@ -533,7 +585,7 @@
             "Possible serial noise or corruption"
         ];
         const MANUAL_RESET_ERROR = "Failed to leave Flash mode failed with status 198,0";
-        const MANUAL_RESET_MESSAGE = "PLEASE PRESS RESET NOW TO BOOT THE NEW FIRMWARE";
+        const MANUAL_RESET_MESSAGE = "PLEASE PRESS RESET OR POWER CYCLE THE CONTROLLER TO BOOT THE NEW FIRMWARE, THEN CONNECT USING OOZNEST CONTROL";
         const BOOTLOADER_COMMAND = "$bootloader\n";
         const BOOTLOADER_MESSAGE = "[MSG:Warning: Entering ESP32 Bootloader]";
         const FIRMWARE_SERIAL_BAUDRATE = 115200;
@@ -649,6 +701,16 @@
             progressPercent.innerText = '0%';
         };
 
+        const showCompletionModal = () => {
+            completionModal.style.display = 'flex';
+            completionModal.setAttribute('aria-hidden', 'false');
+        };
+
+        const hideCompletionModal = () => {
+            completionModal.style.display = 'none';
+            completionModal.setAttribute('aria-hidden', 'true');
+        };
+
         const waitForBootloaderMessage = async (port, timeoutMs = 5000) => {
             const decoder = new TextDecoder();
             const reader = port.readable.getReader();
@@ -743,6 +805,11 @@
             settingsPanel.style.display = isVisible ? 'none' : 'grid';
         };
 
+        closeCompletionModal.onclick = hideCompletionModal;
+        completionModal.onclick = (event) => {
+            if (event.target === completionModal) hideCompletionModal();
+        };
+
         btnEnterBootloader.onclick = async () => {
             let connected = false;
             try {
@@ -833,6 +900,7 @@
                 const msg = e.message || "Unknown error";
                 if (msg.includes(MANUAL_RESET_ERROR)) {
                     terminal.writeLine(`\n[COMPLETE] ${MANUAL_RESET_MESSAGE}`);
+                    showCompletionModal();
                 } else {
                     terminal.writeLine(`\n[CRITICAL] ${msg}`);
                 }
