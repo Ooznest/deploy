@@ -12,6 +12,7 @@
 
     <!-- Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         :root {
@@ -273,6 +274,17 @@
             transform: none;
         }
 
+        button i, .btn-icon {
+            display: inline-flex;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        .heading-icon {
+            display: inline-flex;
+            vertical-align: middle;
+            margin-right: 6px;
+            color: var(--oz-primary);
+        }
         button:disabled {
             background: #e0e0e0;
             color: #9e9e9e;
@@ -470,8 +482,8 @@
         <div class="brand-lockup">
             <img src="ooznest-logo.png" alt="Ooznest logo">
             <div class="brand-copy">
-                <h1>grblHAL Installer</h1>
-                <p>Motion Control Core firmware deployment utility</p>
+                <h1>grblHAL Deployment Tool</h1>
+                <p>Ooznest Motion Control Core: Firmware utility</p>
             </div>
         </div>
         <div class="brand-badge">Native USB + WebSerial Installer</div>
@@ -483,7 +495,7 @@
                 <img class="diagram-img" src="diagram.png" alt="Ooznest Core Diagram"/>
                 <div class="log-card">
                     <div class="panel-heading">
-                        <h2>Deployment Log</h2>
+                        <h2><i data-lucide="terminal" class="heading-icon"></i>Deployment Log</h2>
                         <p>Live device output</p>
                     </div>
 
@@ -503,32 +515,34 @@
             <div class="instruction-box">
                 <div class="instruction-grid">
                     <div class="instruction-card instruction-wide">
-                        <h3>1) Connect USB-C Cable</h3>
+                        <h3><i data-lucide="usb" class="heading-icon"></i>1) Connect USB-C Cable</h3>
                         <p>Connect <strong>USB-C Cable</strong> to your computer. Once connected, the next step is to choose <strong>one bootloader path</strong> below, depending on the state of the controller firmware.</p>
-                        <p>Next: Choose a bootloader path below</p>
-                    </div>
-                    <div class="instruction-card">
-                        <h3>2) Manual Bootloader Entry</h3>
-                        <p>Use this for controllers with no firmware or corrupted firmware. Then click <strong>Connect Device</strong>.</p>
-                        <p>Press and hold the <strong>MODE</strong> button, </p>
-                        <p>then click <strong>RESET</strong>, then release <strong>MODE</strong>. </p>
-                        <p>Click <strong>Connect Device</strong>.</p>
-                        <button id="btnConnect" class="btn-secondary">3. Connect Device</button>
-                    </div>
-                    <div class="instruction-card">
-                        <h3>2) Automatic Bootloader Entry</h3>
-                        <p>Use this for controllers already running grblHAL v20260622 or newer.</p>
-                        <p>Click <strong>Enter Bootloader</strong>.</p>
-                        <button id="btnEnterBootloader" class="btn-secondary">3. Enter Bootloader</button>
                     </div>
                     <div class="instruction-card instruction-wide">
-                        <h3>4) Flash grblHAL</h3>
-                        <p>Once one of the step 3 bootloader actions has completed, click <strong>Flash grblHAL</strong> to deploy the firmware.</p>
+                      <p>Next: Choose a bootloader method below</p>
+                    </div>
+                    <div class="instruction-card">
+                        <h3><i data-lucide="mouse-pointer-click" class="heading-icon"></i>2) Manual Bootloader Entry</h3>
+                        <p>Use this for controllers with no firmware or corrupted firmware.
+                        <p>&bull; Press and hold the <strong>MODE</strong> button, </p>
+                        <p>&bull; then click <strong>RESET</strong>, then release <strong>MODE</strong>. </p>
+                        <p>&bull; Click <strong>Connect Device</strong>.</p>
+                        <button id="btnConnect" class="btn-secondary"><i data-lucide="cable"></i>Connect Device</button>
+                    </div>
+                    <div class="instruction-card">
+                        <h3><i data-lucide="sparkles" class="heading-icon"></i>2) Automatic Bootloader Entry</h3>
+                        <p>Use this for updating controllers already running grblHAL v20260622 or newer.</p>
+                        <p>&bull; Click <strong>Enter Bootloader</strong>.</p>
+                        <button id="btnEnterBootloader" class="btn-secondary"><i data-lucide="arrow-down-to-line"></i>Enter Bootloader</button>
+                        <br>
+                        <p>This will trigger a <code>$BOOTLOADER</code> command on the controller, then prompt you to re-connect to the Flashing port</p>
+                    </div>
+                    <div class="instruction-card instruction-wide">
+                        <h3><i data-lucide="zap" class="heading-icon"></i>3) Flash grblHAL</h3>
+                        <p>Once controller had entered bootloader, click <strong>Flash grblHAL</strong> to deploy the firmware.</p>
                         <div class="instruction-card-actions">
-                            <button id="btnFlash" class="btn-primary" disabled>4. Flash grblHAL</button>
-                            <button id="toggleSettings" class="btn-ghost" title="Settings">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.81,11.69,4.81,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.5c-1.93,0-3.5-1.57-3.5-3.5 s1.57-3.5,3.5-3.5s3.5,1.57,3.5,3.5S13.93,15.5,12,15.5z"/></svg>
-                            </button>
+                            <button id="btnFlash" class="btn-primary" disabled><i data-lucide="zap"></i>Flash grblHAL</button>
+                            <button id="toggleSettings" class="btn-ghost" title="Settings"><i data-lucide="settings"></i></button>
                         </div>
                         <div id="settingsPanel" class="settings-panel">
                             <div class="field">
@@ -568,18 +582,7 @@
         </div>
 
     </div>
-    <div id="completionModal" class="modal-overlay" aria-hidden="true">
-        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="completionModalTitle">
-            <h3 id="completionModalTitle">Firmware installation complete</h3>
-            <p>Either press <strong>RESET</strong> on the controller to reboot the device with the new firmware, or power cycle the controller.</p>
-            <p>To power cycle fully: power off, remove the USB cable so the power provided by the USB cable is removed as well, then reconnect USB and power the controller up again.</p>
-            <p>The controller must be reset or power cycled for a fresh boot using the new firmware.</p>
-            <p>After that, connect to it using <strong>Ooznest Control</strong>.</p>
-            <div class="modal-actions">
-                <button id="closeCompletionModal" class="btn-primary" type="button">Close</button>
-            </div>
-        </div>
-    </div>
+
     <script type="module">
         import {
             ESPLoader, Transport, ClassicReset, HardReset, UsbJtagSerialReset
@@ -591,13 +594,11 @@
         const btnFlash = document.getElementById('btnFlash');
         const toggleSettings = document.getElementById('toggleSettings');
         const settingsPanel = document.getElementById('settingsPanel');
-        const completionModal = document.getElementById('completionModal');
-        const closeCompletionModal = document.getElementById('closeCompletionModal');
         const progressBar = document.getElementById('progressBar');
         const progressWrap = document.getElementById('progressWrap');
         const progressPercent = document.getElementById('progressPercent');
 
-        let device, transport, esploader;
+        let device, transport, esploader, intentionalDisconnect = false;
         const DEFAULT_VENDOR_FILTERS = [{ usbVendorId: 0x303a, usbProductId: 0x1001 }];
         const RETRYABLE_PACKET_ERRORS = [
             "Invalid head of packet",
@@ -620,7 +621,7 @@
             if (line.includes('[ERROR]')) {
                 return 'terminal-line terminal-line-error';
             }
-            if (line.includes('[COMPLETE]')) {
+            if (line.includes('[COMPLETE]') || line.includes('Hash of data verified')) {
                 return 'terminal-line terminal-line-complete';
             }
             if (line.includes('[WARN]') || line.includes('[WARNING]')) {
@@ -678,8 +679,9 @@
             );
         };
 
-        const disconnectTransport = async () => {
+        const disconnectTransport = async (intentional = false) => {
             if (!transport) return;
+            intentionalDisconnect = intentional;
             try {
                 await transport.disconnect();
             } catch (_) {
@@ -687,6 +689,7 @@
             } finally {
                 transport = null;
                 esploader = null;
+                intentionalDisconnect = false;
             }
         };
 
@@ -813,16 +816,6 @@
             progressPercent.innerText = '0%';
         };
 
-        const showCompletionModal = () => {
-            completionModal.style.display = 'flex';
-            completionModal.setAttribute('aria-hidden', 'false');
-        };
-
-        const hideCompletionModal = () => {
-            completionModal.style.display = 'none';
-            completionModal.setAttribute('aria-hidden', 'true');
-        };
-
         const waitForBootloaderMessage = async (port, timeoutMs = 5000) => {
             const decoder = new TextDecoder();
             const reader = port.readable.getReader();
@@ -903,6 +896,20 @@
             return { alreadyInBootloader };
         };
 
+        const setIdleState = () => {
+            btnEnterBootloader.disabled = false;
+            btnConnect.disabled = false;
+            btnFlash.disabled = true;
+            toggleSettings.disabled = false;
+        };
+
+        const setConnectedState = () => {
+            btnEnterBootloader.disabled = true;
+            btnConnect.disabled = true;
+            btnFlash.disabled = false;
+            toggleSettings.disabled = false;
+        };
+
         const setBusyState = (busy) => {
             btnEnterBootloader.disabled = busy;
             btnConnect.disabled = busy;
@@ -912,18 +919,25 @@
             }
         };
 
+        navigator.serial.addEventListener('disconnect', (event) => {
+            if (device && event.target === device) {
+                if (intentionalDisconnect) {
+                    terminal.writeLine("[DISCONNECT] Bootloader port closed.");
+                } else {
+                    terminal.writeLine("\n[WARN] Serial port disconnected unexpectedly.");
+                }
+                device = null;
+                disconnectTransport();
+                setIdleState();
+            }
+        });
+
         toggleSettings.onclick = () => {
             const isVisible = settingsPanel.style.display === 'grid';
             settingsPanel.style.display = isVisible ? 'none' : 'grid';
         };
 
-        closeCompletionModal.onclick = hideCompletionModal;
-        completionModal.onclick = (event) => {
-            if (event.target === completionModal) hideCompletionModal();
-        };
-
         btnEnterBootloader.onclick = async () => {
-            let connected = false;
             try {
                 setBusyState(true);
                 resetProgress();
@@ -936,40 +950,31 @@
                     terminal.writeLine("[SYSTEM] Connecting to bootloader...");
                     await connectLoader(getSelectedBaudrate(), true);
                 }
-                btnFlash.disabled = false;
-                connected = true;
+                setConnectedState();
             } catch (e) {
                 terminal.writeLine(`\n[ERROR] ${e.message}`);
                 await disconnectTransport();
-            } finally {
-                btnEnterBootloader.disabled = connected;
-                btnConnect.disabled = connected;
-                toggleSettings.disabled = false;
+                setIdleState();
             }
         };
 
         btnConnect.onclick = async () => {
-            let connected = false;
             try {
                 setBusyState(true);
                 resetProgress();
                 terminal.clean();
                 await connectLoader(getSelectedBaudrate(), true);
-                btnFlash.disabled = false;
-                connected = true;
+                setConnectedState();
             } catch (e) {
                 terminal.writeLine(`\n[ERROR] ${e.message}`);
                 await disconnectTransport();
-            } finally {
-                btnEnterBootloader.disabled = connected;
-                btnConnect.disabled = connected;
-                toggleSettings.disabled = false;
+                setIdleState();
             }
         };
 
         btnFlash.onclick = async () => {
             try {
-                btnFlash.disabled = true;
+                setBusyState(true);
                 resetProgress();
 
                 const images = await loadFlashImages();
@@ -1006,22 +1011,21 @@
                     terminal.writeLine("[COMPLETE] Firmware Installed - please open Ooznest Control and connect to your controller");
                 } else {
                     terminal.writeLine("[RESET] Leaving chip in bootloader.");
-                    btnConnect.disabled = false;
-                    btnFlash.disabled = false;
+                    await disconnectTransport();
                 }
+                setIdleState();
             } catch (e) {
                 const msg = e.message || "Unknown error";
                 if (msg.includes(MANUAL_RESET_ERROR)) {
                     terminal.writeLine(`\n[COMPLETE] ${MANUAL_RESET_MESSAGE}`);
-                    showCompletionModal();
-                } else {
-                    terminal.writeLine(`\n[CRITICAL] ${msg}`);
-                    btnConnect.disabled = false;
                 }
-            } finally {
-                btnFlash.disabled = false;
+                terminal.writeLine(`\n[CRITICAL] ${msg}`);
+                await disconnectTransport();
+                setIdleState();
             }
         };
+
+        lucide.createIcons();
     </script>
 </body>
 </html>
