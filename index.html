@@ -17,26 +17,40 @@
         :root {
             --oz-primary: #FF6600;
             --oz-primary-light: #FF8533;
+            --oz-primary-dark: #D55700;
             --oz-teal-brand: #004C5B;
             --oz-teal-mid: #449D9F;
             --oz-teal-light: #B0CACF;
             --oz-teal-xlight: #EBEFEF;
+            --oz-black: #0D1F22;
             --oz-grey-dark: #2F373C;
             --oz-grey-mid: #909090;
+            --oz-grey-light: #EBEFEF;
             --oz-white: #FFFFFF;
-            --oz-error: #D32F2F;
+            --oz-bg-panel: #F7F9F9;
+            --oz-error: #B41B13;
             --oz-r-xl: 30px;
+            --oz-r-md: 16px;
+            --oz-r-sm: 10px;
+            --oz-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --oz-shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+            --oz-grad-teal: radial-gradient(78.83% 124.97% at 96% 82.92%, #004C5B 0%, #449D9F 100%);
+            --oz-grad-orange: radial-gradient(78.83% 124.97% at 96% 82.92%, #FFB482 0%, #FF6600 100%);
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Roboto', sans-serif;
             font-size: 15px;
-            background-color: var(--oz-teal-xlight);
+            background: var(--oz-white);
             color: var(--oz-grey-dark);
-            margin: 0; padding: 0;
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
         }
 
         h1, h2, h3 { font-family: 'Nunito', sans-serif; font-weight: 800; margin: 0; }
@@ -44,176 +58,458 @@
         .page-header {
             background-color: var(--oz-white);
             border-bottom: 2px solid var(--oz-teal-xlight);
-            padding: 16px 40px;
-            text-align: center;
-            box-shadow: 0 2px 12px rgba(0, 76, 91, 0.07);
+            padding: 18px 28px 14px;
+            box-shadow: 0 2px 8px rgba(0, 76, 91, 0.05);
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 20px;
         }
 
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-lockup img {
+            width: 188px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .brand-copy h1 {
+            font-size: 28px;
+            line-height: 1.05;
+            color: var(--oz-primary);
+        }
+
+        .brand-copy p {
+            margin: 4px 0 0;
+            font-size: 11px;
+            color: var(--oz-grey-mid);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.7px;
+        }
+
+        .brand-badge { display: none; }
+
         .container {
-            max-width: 850px;
+            max-width: 1120px;
             width: 95%;
-            margin: 30px auto;
-            background: var(--oz-teal-mid);
-            padding: 40px;
-            border-radius: var(--oz-r-xl) 0 0 0;
+            margin: 32px auto;
+            background: var(--oz-white);
+            padding: 0;
+            border-radius: 0;
             position: relative;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            color: white;
+            box-shadow: none;
+            color: var(--oz-grey-dark);
+            overflow: hidden;
+            border: none;
+        }
+
+        .container::before {
+            content: none;
         }
 
         .diagram-section {
-            display: flex;
-            align-items: center;
+            display: grid;
+            grid-template-columns: minmax(220px, 0.9fr) minmax(0, 1.1fr);
             gap: 24px;
-            margin-bottom: 24px;
-            padding: 20px;
-            background-color: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
+            margin-bottom: 20px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            color: var(--oz-grey-dark);
+            box-shadow: none;
+            position: relative;
+            overflow: visible;
         }
+
+        .visual-column {
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
+            gap: 18px;
+            min-width: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .diagram-section::after { content: none; }
 
         .diagram-img {
-            max-width: 45%;
+            max-width: 100%;
             height: auto;
             background: white;
-            padding: 10px;
-            border-radius: 4px;
+            padding: 14px;
+            border-radius: 16px;
+            border: none;
+            box-shadow: none;
+            position: relative;
+            z-index: 1;
         }
 
-        .instruction-box p { margin: 8px 0; font-weight: 400; font-size: 15px; line-height: 1.5; }
-        .instruction-box strong { color: white; font-weight: 900; text-decoration: underline; }
+        .log-card {
+            background: var(--oz-grey-light);
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: none;
+            min-height: 0;
+        }
 
-        .action-bar { display: flex; gap: 12px; margin-bottom: 20px; }
+        .instruction-box {
+            display: grid;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .instruction-box p { margin: 0; font-weight: 400; font-size: 15px; line-height: 1.6; }
+        .instruction-box strong { color: var(--oz-teal-brand); font-weight: 900; text-decoration: none; }
+        .instruction-wide {
+            grid-column: 1 / -1;
+        }
+        .instruction-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .instruction-card {
+            background: var(--oz-grey-light);
+            border: none;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: none;
+            position: relative;
+            overflow: hidden;
+        }
+        .instruction-card .btn-secondary {
+            width: 100%;
+            margin-top: 14px;
+        }
+        .instruction-card .btn-primary {
+            width: 100%;
+            margin-top: 14px;
+        }
+        .instruction-card-actions {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 12px;
+            align-items: stretch;
+            margin-top: 14px;
+            min-height: 48px;
+        }
+        .instruction-card-actions .btn-primary,
+        .instruction-card-actions .btn-ghost {
+            margin-top: 0;
+            min-height: 48px;
+            height: 48px;
+        }
+        .instruction-card h3 {
+            font-size: 15px;
+            margin-bottom: 10px;
+            color: var(--oz-teal-brand);
+        }
+        .instruction-card p {
+            font-size: 14px;
+            margin: 0;
+            color: var(--oz-grey-dark);
+        }
+        .instruction-card p + p {
+            margin-top: 12px;
+        }
+        .instruction-card strong {
+            color: var(--oz-teal-brand);
+            text-decoration: none;
+        }
+        .instruction-divider {
+            font-family: 'Nunito', sans-serif;
+            font-size: 12px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--oz-teal-brand);
+        }
 
         button {
             font-family: 'Nunito', sans-serif;
-            font-size: 14px;
-            font-weight: 800;
-            border-radius: 6px;
-            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            border: 1px solid transparent;
+            border-radius: 8px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: 0.3s;
             min-height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
+            letter-spacing: 0;
+            line-height: 24px;
+            padding: 8px 32px;
+            white-space: nowrap;
         }
 
-        .btn-primary { background-color: var(--oz-primary); color: white; flex: 2; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
-        .btn-primary:hover:not(:disabled) { background-color: var(--oz-primary-light); transform: translateY(-1px); }
+        .btn-primary {
+            background: var(--oz-primary-light);
+            color: white;
+            box-shadow: none;
+            border-color: var(--oz-primary-light);
+        }
+        .btn-primary:hover:not(:disabled) { background: var(--oz-primary); border-color: var(--oz-primary); transform: none; }
 
-        .btn-secondary { background-color: white; color: var(--oz-teal-brand); flex: 1; }
-        .btn-secondary:hover:not(:disabled) { background-color: var(--oz-teal-xlight); transform: translateY(-1px); }
+        .btn-secondary {
+            background-color: var(--oz-white);
+            color: var(--oz-teal-brand);
+            border-color: var(--oz-white);
+            box-shadow: none;
+        }
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #ffffff;
+            border-color: #ffffff;
+            transform: none;
+        }
 
-        button:disabled { background-color: #e0e0e0; color: #9e9e9e; cursor: not-allowed; box-shadow: none; }
+        button:disabled {
+            background: #e0e0e0;
+            color: #9e9e9e;
+            cursor: not-allowed;
+            box-shadow: none;
+            border-color: #e0e0e0;
+        }
 
-        .btn-ghost { background-color: rgba(255,255,255,0.2); color: white; padding: 0 15px; border: 1px solid rgba(255,255,255,0.3); min-width: 48px; }
+        .btn-ghost {
+            background-color: var(--oz-white);
+            color: var(--oz-teal-brand);
+            padding: 8px 16px;
+            border-color: var(--oz-white);
+            min-width: 48px;
+            box-shadow: none;
+        }
+        .btn-ghost:hover:not(:disabled) {
+            background: #ffffff;
+            border-color: #ffffff;
+            transform: none;
+        }
 
         .settings-panel {
             display: none;
             background-color: var(--oz-white);
             border-radius: 8px;
             padding: 20px;
-            margin-top: 15px;
+            margin: 16px 0 0;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
             color: var(--oz-grey-dark);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: none;
+            border: none;
         }
 
-        .field label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--oz-grey-mid); margin-bottom: 4px; display: block; }
+        .field label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--oz-teal-brand); margin-bottom: 6px; display: block; letter-spacing: 1px; }
 
-        select { width: 100%; font-family: 'Nunito', sans-serif; padding: 10px; border: 1.5px solid var(--oz-teal-light); border-radius: 4px; outline: none; }
+        select {
+            width: 100%;
+            font-family: 'Nunito', sans-serif;
+            padding: 12px 14px;
+            border: 1.5px solid var(--oz-teal-light);
+            border-radius: 8px;
+            outline: none;
+            background: var(--oz-white);
+            color: var(--oz-grey-dark);
+        }
+        select:focus {
+            border-color: var(--oz-primary);
+            box-shadow: 0 0 0 4px rgba(255, 102, 0, 0.12);
+        }
 
         #terminal {
-            background-color: #000000;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)),
+                #0d1f22;
             color: #adbac7;
             font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
-            padding: 20px;
-            height: 250px;
+            padding: 18px;
+            height: 320px;
             overflow-y: auto;
-            margin-top: 25px;
             white-space: pre-wrap;
             border-left: 4px solid var(--oz-primary);
+            border-radius: 20px 6px 20px 6px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), var(--oz-shadow-lg);
         }
 
-        .progress-wrap { margin-top: 20px; display: none; }
-        .progress-bar-bg { background-color: rgba(255,255,255,0.2); height: 12px; border-radius: 6px; overflow: hidden; margin-top: 8px; }
-        #progressBar { background-color: var(--oz-primary); height: 100%; width: 0%; transition: width 0.1s; }
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 2px 0 12px;
+        }
+
+        .panel-heading h2 {
+            font-size: 18px;
+            color: var(--oz-teal-brand);
+        }
+
+        .panel-heading p {
+            margin: 0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--oz-grey-mid);
+            font-weight: 700;
+        }
+
+        .progress-wrap {
+            margin: 0 0 14px;
+            display: block;
+            background: var(--oz-white);
+            border: 1px solid rgba(0, 76, 91, 0.12);
+            border-radius: 0;
+            padding: 14px 16px;
+            box-shadow: none;
+        }
+        .progress-bar-bg { background-color: #d9e3e4; height: 12px; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+        #progressBar { background: var(--oz-primary); height: 100%; width: 0%; transition: width 0.1s; }
+
+        @media (max-width: 720px) {
+            .page-header {
+                padding: 16px 18px;
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .brand-lockup {
+                align-items: flex-start;
+            }
+
+            .diagram-section {
+                grid-template-columns: 1fr;
+                padding: 18px;
+            }
+
+            .visual-column {
+                grid-template-rows: auto auto;
+            }
+
+            .instruction-grid {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                width: calc(100% - 20px);
+                padding: 18px;
+                margin: 16px auto 24px;
+            }
+        }
 
     </style>
 </head>
 <body>
 
     <div class="page-header">
-        <h1>Ooznest <span style="color: var(--oz-primary);">Motion Control Core</span></h1>
-        <p style="font-family: 'Roboto'; font-size: 11px; color: var(--oz-grey-mid); font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">Firmware Deployment Utility</p>
+        <div class="brand-lockup">
+            <img src="ooznest-logo.png" alt="Ooznest logo">
+            <div class="brand-copy">
+                <h1>grblHAL Installer</h1>
+                <p>Motion Control Core firmware deployment utility</p>
+            </div>
+        </div>
+        <div class="brand-badge">Native USB + WebSerial Installer</div>
     </div>
 
     <div class="container">
         <div class="diagram-section">
-            <img class="diagram-img" src="diagram.png" alt="Ooznest Core Diagram"/>
+            <div class="visual-column">
+                <img class="diagram-img" src="diagram.png" alt="Ooznest Core Diagram"/>
+                <div class="log-card">
+                    <div class="panel-heading">
+                        <h2>Deployment Log</h2>
+                        <p>Live device output</p>
+                    </div>
+
+                    <div class="progress-wrap" id="progressWrap">
+                        <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                            <label style="font-weight: 800; letter-spacing: 1px;">DEPLOYMENT PROGRESS</label>
+                            <span id="progressPercent" style="font-weight: 900;">0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="progressBar"></div>
+                        </div>
+                    </div>
+
+                    <div id="terminal">System Ready. Waiting for connection...</div>
+                </div>
+            </div>
             <div class="instruction-box">
-                <p>1) Connect <strong>USB-C Cable</strong> to your computer.</p>
-                <p>2) Press and hold the <strong>MODE</strong> button.</p>
-                <p>3) Click <strong>RESET</strong>, then release <strong>MODE</strong>.</p>
+                <div class="instruction-grid">
+                    <div class="instruction-card instruction-wide">
+                        <h3>1) Connect USB-C Cable</h3>
+                        <p>Connect <strong>USB-C Cable</strong> to your computer. Once connected, the next step is to choose <strong>one bootloader path</strong> below, depending on the state of the controller firmware.</p>
+                        <p>Next: Choose a bootloader path below</p>
+                    </div>
+                    <div class="instruction-card">
+                        <h3>2) Manual Bootloader Entry</h3>
+                        <p>Use this for controllers with no firmware or corrupted firmware. Then click <strong>Connect Device</strong>.</p>
+                        <p>Press and hold the <strong>MODE</strong> button, </p>
+                        <p>then click <strong>RESET</strong>, then release <strong>MODE</strong>. </p>
+                        <p>Click <strong>Connect Device</strong>.</p>
+                        <button id="btnConnect" class="btn-secondary">3. Connect Device</button>
+                    </div>
+                    <div class="instruction-card">
+                        <h3>2) Automatic Bootloader Entry</h3>
+                        <p>Use this for controllers already running grblHAL v20260622 or newer.</p>
+                        <p>Click <strong>Enter Bootloader</strong>.</p>
+                        <button id="btnEnterBootloader" class="btn-secondary">3. Enter Bootloader</button>
+                    </div>
+                    <div class="instruction-card instruction-wide">
+                        <h3>4) Flash grblHAL</h3>
+                        <p>Once one of the step 3 bootloader actions has completed, click <strong>Flash grblHAL</strong> to deploy the firmware.</p>
+                        <div class="instruction-card-actions">
+                            <button id="btnFlash" class="btn-primary" disabled>4. Flash grblHAL</button>
+                            <button id="toggleSettings" class="btn-ghost" title="Settings">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.81,11.69,4.81,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.5c-1.93,0-3.5-1.57-3.5-3.5 s1.57-3.5,3.5-3.5s3.5,1.57,3.5,3.5S13.93,15.5,12,15.5z"/></svg>
+                            </button>
+                        </div>
+                        <div id="settingsPanel" class="settings-panel">
+                            <div class="field">
+                                <label>Baud Rate</label>
+                                <select id="baudRate">
+                                    <option value="115200" selected>115200</option>
+                                    <option value="230400">230400</option>
+                                    <option value="460800">460800</option>
+                                    <option value="921600">921600</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Flash Mode</label>
+                                <select id="flashMode">
+                                    <option value="dio" selected>DIO</option>
+                                    <option value="qio">QIO</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>Before Reset</label>
+                                <select id="beforeMode">
+                                    <option value="no_reset">No Reset (native USB)</option>
+                                    <option value="default_reset">Default Reset</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label>After Flash</label>
+                                <select id="afterMode">
+                                    <option value="flash_finish">Boot App (flash finish)</option>
+                                    <option value="no_reset">Stay in Bootloader</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="action-bar">
-            <button id="btnConnect" class="btn-secondary">4. Connect Device</button>
-            <button id="toggleSettings" class="btn-ghost" title="Settings">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.81,11.69,4.81,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.5c-1.93,0-3.5-1.57-3.5-3.5 s1.57-3.5,3.5-3.5s3.5,1.57,3.5,3.5S13.93,15.5,12,15.5z"/></svg>
-            </button>
-            <button id="btnFlash" class="btn-primary" disabled>5. Flash grblHAL</button>
-        </div>
-
-        <div id="settingsPanel" class="settings-panel">
-            <div class="field">
-                <label>Baud Rate</label>
-                <select id="baudRate">
-                    <option value="115200" selected>115200</option>
-                    <option value="230400">230400</option>
-                    <option value="460800">460800</option>
-                    <option value="921600">921600</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Flash Mode</label>
-                <select id="flashMode">
-                    <option value="dio" selected>DIO</option>
-                    <option value="qio">QIO</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>Before Reset</label>
-                <select id="beforeMode">
-                    <option value="no_reset">No Reset (native USB)</option>
-                    <option value="default_reset">Default Reset</option>
-                </select>
-            </div>
-            <div class="field">
-                <label>After Flash</label>
-                <select id="afterMode">
-                    <option value="flash_finish">Boot App (flash finish)</option>
-                    <option value="no_reset">Stay in Bootloader</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="progress-wrap" id="progressWrap">
-            <div style="display: flex; justify-content: space-between; font-size: 12px;">
-                <label style="font-weight: 800; letter-spacing: 1px;">DEPLOYMENT PROGRESS</label>
-                <span id="progressPercent" style="font-weight: 900;">0%</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div id="progressBar"></div>
-            </div>
-        </div>
-
-        <div id="terminal">System Ready. Waiting for connection...</div>
     </div>
     <script type="module">
         import {
@@ -221,6 +517,7 @@
         } from "https://unpkg.com/esptool-js/bundle.js";
 
         const termDiv = document.getElementById('terminal');
+        const btnEnterBootloader = document.getElementById('btnEnterBootloader');
         const btnConnect = document.getElementById('btnConnect');
         const btnFlash = document.getElementById('btnFlash');
         const toggleSettings = document.getElementById('toggleSettings');
@@ -237,6 +534,9 @@
         ];
         const MANUAL_RESET_ERROR = "Failed to leave Flash mode failed with status 198,0";
         const MANUAL_RESET_MESSAGE = "PLEASE PRESS RESET NOW TO BOOT THE NEW FIRMWARE";
+        const BOOTLOADER_COMMAND = "$bootloader\n";
+        const BOOTLOADER_MESSAGE = "[MSG:Warning: Entering ESP32 Bootloader]";
+        const FIRMWARE_SERIAL_BAUDRATE = 115200;
 
         const terminal = {
             clean() { termDiv.innerText = ''; },
@@ -246,6 +546,8 @@
                 termDiv.scrollTop = termDiv.scrollHeight;
             }
         };
+
+        const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
         const getSelectedBaudrate = () => parseInt(document.getElementById('baudRate').value, 10);
 
@@ -257,6 +559,14 @@
         const isRetryablePacketError = (error) => {
             const message = error?.message || "";
             return RETRYABLE_PACKET_ERRORS.some((fragment) => message.includes(fragment));
+        };
+
+        const isBootloaderPort = (port) => {
+            const info = port?.getInfo?.() || {};
+            return DEFAULT_VENDOR_FILTERS.some((filter) =>
+                info.usbVendorId === filter.usbVendorId &&
+                info.usbProductId === filter.usbProductId
+            );
         };
 
         const disconnectTransport = async () => {
@@ -334,30 +644,154 @@
             });
         };
 
+        const resetProgress = () => {
+            progressBar.style.width = '0%';
+            progressPercent.innerText = '0%';
+        };
+
+        const waitForBootloaderMessage = async (port, timeoutMs = 5000) => {
+            const decoder = new TextDecoder();
+            const reader = port.readable.getReader();
+            let buffer = "";
+
+            try {
+                while (true) {
+                    const result = await Promise.race([
+                        reader.read(),
+                        sleep(timeoutMs).then(() => ({ timeout: true }))
+                    ]);
+
+                    if (result?.timeout) {
+                        throw new Error(`Timed out waiting for ${BOOTLOADER_MESSAGE}`);
+                    }
+
+                    if (result.done) {
+                        break;
+                    }
+
+                    const chunk = decoder.decode(result.value);
+                    buffer += chunk;
+                    terminal.write(chunk);
+
+                    if (buffer.includes(BOOTLOADER_MESSAGE)) {
+                        return;
+                    }
+                }
+            } finally {
+                reader.releaseLock();
+            }
+
+            throw new Error(`Timed out waiting for ${BOOTLOADER_MESSAGE}`);
+        };
+
+        const enterBootloaderMode = async () => {
+            let normalPort = null;
+            let writer = null;
+            let alreadyInBootloader = false;
+
+            try {
+                terminal.clean();
+                terminal.writeLine("[SYSTEM] Requesting controller port...");
+                normalPort = await navigator.serial.requestPort();
+                if (isBootloaderPort(normalPort)) {
+                    terminal.writeLine("[SYSTEM] Selected port is already the bootloader device.");
+                    device = normalPort;
+                    alreadyInBootloader = true;
+                    return { alreadyInBootloader };
+                }
+                await normalPort.open({ baudRate: FIRMWARE_SERIAL_BAUDRATE });
+                terminal.writeLine(`[SYSTEM] Connected to controller @ ${FIRMWARE_SERIAL_BAUDRATE}`);
+
+                writer = normalPort.writable.getWriter();
+                terminal.writeLine(`[SYSTEM] Sending ${BOOTLOADER_COMMAND.trim()} command...`);
+                await writer.write(new TextEncoder().encode(BOOTLOADER_COMMAND));
+                writer.releaseLock();
+                writer = null;
+
+                terminal.writeLine(`[SYSTEM] Waiting for ${BOOTLOADER_MESSAGE}...`);
+                await waitForBootloaderMessage(normalPort);
+                terminal.writeLine("[SYSTEM] Bootloader message received. Closing controller port...");
+            } finally {
+                if (writer) {
+                    writer.releaseLock();
+                }
+
+                if (normalPort && !alreadyInBootloader) {
+                    try {
+                        await normalPort.close();
+                    } catch (_) {
+                        // The device may already have reset during bootloader handoff.
+                    }
+                }
+            }
+
+            await sleep(500);
+            return { alreadyInBootloader };
+        };
+
+        const setBusyState = (busy) => {
+            btnEnterBootloader.disabled = busy;
+            btnConnect.disabled = busy;
+            toggleSettings.disabled = busy;
+            if (busy) {
+                btnFlash.disabled = true;
+            }
+        };
+
         toggleSettings.onclick = () => {
             const isVisible = settingsPanel.style.display === 'grid';
             settingsPanel.style.display = isVisible ? 'none' : 'grid';
         };
 
-        btnConnect.onclick = async () => {
+        btnEnterBootloader.onclick = async () => {
+            let connected = false;
             try {
-                terminal.clean();
-                await connectLoader(getSelectedBaudrate(), true);
-                btnConnect.disabled = true;
+                setBusyState(true);
+                resetProgress();
+                const result = await enterBootloaderMode();
+                if (result?.alreadyInBootloader) {
+                    terminal.writeLine("[SYSTEM] Continuing with bootloader connection...");
+                    await connectLoader(getSelectedBaudrate(), false);
+                } else {
+                    terminal.writeLine("[SYSTEM] Controller should now be in bootloader mode.");
+                    terminal.writeLine("[SYSTEM] Connecting to bootloader...");
+                    await connectLoader(getSelectedBaudrate(), true);
+                }
                 btnFlash.disabled = false;
+                connected = true;
             } catch (e) {
                 terminal.writeLine(`\n[ERROR] ${e.message}`);
-                btnConnect.disabled = false;
                 await disconnectTransport();
+            } finally {
+                btnEnterBootloader.disabled = connected;
+                btnConnect.disabled = connected;
+                toggleSettings.disabled = false;
+            }
+        };
+
+        btnConnect.onclick = async () => {
+            let connected = false;
+            try {
+                setBusyState(true);
+                resetProgress();
+                terminal.clean();
+                await connectLoader(getSelectedBaudrate(), true);
+                btnFlash.disabled = false;
+                connected = true;
+            } catch (e) {
+                terminal.writeLine(`\n[ERROR] ${e.message}`);
+                await disconnectTransport();
+            } finally {
+                btnEnterBootloader.disabled = connected;
+                btnConnect.disabled = connected;
+                toggleSettings.disabled = false;
             }
         };
 
         btnFlash.onclick = async () => {
             try {
                 btnFlash.disabled = true;
-                progressWrap.style.display = 'block';
-                progressBar.style.width = '0%';
-                progressPercent.innerText = '0%';
+                resetProgress();
 
                 const images = await loadFlashImages();
                 const baudrates = getRetryBaudrates(getSelectedBaudrate());
@@ -367,8 +801,7 @@
                     try {
                         if (index > 0) {
                             terminal.writeLine(`\n[RETRY] Reconnecting at ${baudrate} baud after serial sync failure...`);
-                            progressBar.style.width = '0%';
-                            progressPercent.innerText = '0%';
+                            resetProgress();
                             await connectLoader(baudrate);
                         }
 
